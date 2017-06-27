@@ -10,8 +10,6 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
-  ViewPagerAndroid,
-  Platform,
   ActivityIndicator,
   ViewPropTypes
 } from "react-native"
@@ -415,31 +413,13 @@ export default class extends Component {
     if (state.dir === "x") x = diff * state.width
     if (state.dir === "y") y = diff * state.height
 
-    if (Platform.OS === "android") {
-      this.refs.scrollView &&
-        this.refs.scrollView[animated ? "setPage" : "setPageWithoutAnimation"](
-          diff
-        )
-    } else {
-      this.refs.scrollView && this.refs.scrollView.scrollTo({ x, y, animated })
-    }
+    this.refs.scrollView && this.refs.scrollView.scrollTo({ x, y, animated })
 
     // update scroll state
     this.internals.isScrolling = true
     this.setState({
       autoplayEnd: false
     })
-
-    // trigger onScrollEnd manually in android
-    if (!animated || Platform.OS === "android") {
-      setImmediate(() => {
-        this.onScrollEnd({
-          nativeEvent: {
-            position: diff
-          }
-        })
-      })
-    }
   }
 
   scrollViewPropOverrides = () => {
@@ -598,32 +578,19 @@ export default class extends Component {
   }
 
   renderScrollView = pages => {
-    if (Platform.OS === "ios") {
-      return (
-        <ScrollView
-          ref="scrollView"
-          {...this.props}
-          {...this.scrollViewPropOverrides()}
-          contentContainerStyle={[styles.wrapper, this.props.style]}
-          contentOffset={this.state.offset}
-          onScrollBeginDrag={this.onScrollBegin}
-          onMomentumScrollEnd={this.onScrollEnd}
-          onScrollEndDrag={this.onScrollEndDrag}
-        >
-          {pages}
-        </ScrollView>
-      )
-    }
     return (
-      <ViewPagerAndroid
+      <ScrollView
         ref="scrollView"
         {...this.props}
-        initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
-        onPageSelected={this.onScrollEnd}
-        style={{ flex: 1 }}
+        {...this.scrollViewPropOverrides()}
+        contentContainerStyle={[styles.wrapper, this.props.style]}
+        contentOffset={this.state.offset}
+        onScrollBeginDrag={this.onScrollBegin}
+        onMomentumScrollEnd={this.onScrollEnd}
+        onScrollEndDrag={this.onScrollEndDrag}
       >
         {pages}
-      </ViewPagerAndroid>
+      </ScrollView>
     )
   }
 
