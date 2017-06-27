@@ -2,7 +2,8 @@
  * react-native-swiper
  * @author leecade<leecade@163.com>
  */
-import React, { Component, PropTypes } from 'react'
+import PropTypes from "prop-types"
+import React, { Component } from "react"
 import {
   Text,
   View,
@@ -11,10 +12,11 @@ import {
   TouchableOpacity,
   ViewPagerAndroid,
   Platform,
-  ActivityIndicator
-} from 'react-native'
+  ActivityIndicator,
+  ViewPropTypes
+} from "react-native"
 
-const { width, height } = Dimensions.get('window')
+const { width, height } = Dimensions.get("window")
 
 /**
  * Default styles
@@ -22,71 +24,71 @@ const { width, height } = Dimensions.get('window')
  */
 const styles = {
   container: {
-    backgroundColor: 'transparent',
-    position: 'relative'
+    backgroundColor: "transparent",
+    position: "relative"
   },
 
   wrapper: {
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent"
   },
 
   slide: {
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent"
   },
 
   pagination_x: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 25,
     left: 0,
     right: 0,
-    flexDirection: 'row',
+    flexDirection: "row",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent'
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent"
   },
 
   pagination_y: {
-    position: 'absolute',
+    position: "absolute",
     right: 15,
     top: 0,
     bottom: 0,
-    flexDirection: 'column',
+    flexDirection: "column",
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent'
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent"
   },
 
   title: {
     height: 30,
-    justifyContent: 'center',
-    position: 'absolute',
+    justifyContent: "center",
+    position: "absolute",
     paddingLeft: 10,
     bottom: -30,
     left: 0,
-    flexWrap: 'nowrap',
+    flexWrap: "nowrap",
     width: 250,
-    backgroundColor: 'transparent'
+    backgroundColor: "transparent"
   },
 
   buttonWrapper: {
-    backgroundColor: 'transparent',
-    flexDirection: 'row',
-    position: 'absolute',
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    position: "absolute",
     top: 0,
     left: 0,
     flex: 1,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    justifyContent: 'space-between',
-    alignItems: 'center'
+    justifyContent: "space-between",
+    alignItems: "center"
   },
 
   buttonText: {
     fontSize: 50,
-    color: '#007aff',
-    fontFamily: 'Arial'
+    color: "#007aff",
+    fontFamily: "Arial"
   }
 }
 
@@ -100,7 +102,7 @@ export default class extends Component {
   static propTypes = {
     horizontal: PropTypes.bool,
     children: PropTypes.node.isRequired,
-    style: View.propTypes.style,
+    style: ViewPropTypes.style,
     pagingEnabled: PropTypes.bool,
     showsHorizontalScrollIndicator: PropTypes.bool,
     showsVerticalScrollIndicator: PropTypes.bool,
@@ -163,23 +165,25 @@ export default class extends Component {
   autoplayTimer = null
   loopJumpTimer = null
 
-  componentWillReceiveProps (nextProps) {
-    const sizeChanged = (nextProps.width || width) !== this.state.width ||
-                        (nextProps.height || height) !== this.state.height
-    if (!nextProps.autoplay && this.autoplayTimer) clearTimeout(this.autoplayTimer)
+  componentWillReceiveProps(nextProps) {
+    const sizeChanged =
+      (nextProps.width || width) !== this.state.width ||
+      (nextProps.height || height) !== this.state.height
+    if (!nextProps.autoplay && this.autoplayTimer)
+      clearTimeout(this.autoplayTimer)
     this.setState(this.initState(nextProps, sizeChanged))
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.autoplay()
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.autoplayTimer && clearTimeout(this.autoplayTimer)
     this.loopJumpTimer && clearTimeout(this.loopJumpTimer)
   }
 
-  initState (props, setOffsetInState) {
+  initState(props, setOffsetInState) {
     // set the current state
     const state = this.state || {}
 
@@ -200,11 +204,13 @@ export default class extends Component {
     } else {
       // reset the index
       setOffsetInState = true // if the index is reset, go ahead and update the offset in state
-      initState.index = initState.total > 1 ? Math.min(props.index, initState.total - 1) : 0
+      initState.index = initState.total > 1
+        ? Math.min(props.index, initState.total - 1)
+        : 0
     }
 
     // Default: horizontal
-    initState.dir = props.horizontal === false ? 'y' : 'x'
+    initState.dir = props.horizontal === false ? "y" : "x"
     initState.width = props.width || width
     initState.height = props.height || height
     newInternals.offset = {}
@@ -214,7 +220,7 @@ export default class extends Component {
       if (props.loop) {
         setup++
       }
-      newInternals.offset[initState.dir] = initState.dir === 'y'
+      newInternals.offset[initState.dir] = initState.dir === "y"
         ? initState.height * setup
         : initState.width * setup
     }
@@ -230,7 +236,7 @@ export default class extends Component {
   }
 
   // include internals with state
-  fullState () {
+  fullState() {
     return Object.assign({}, this.state, this.internals)
   }
 
@@ -238,27 +244,35 @@ export default class extends Component {
     if (!this.state.loopJump) return
     const i = this.state.index + (this.props.loop ? 1 : 0)
     const scrollView = this.refs.scrollView
-    this.loopJumpTimer = setTimeout(() => scrollView.setPageWithoutAnimation &&
-      scrollView.setPageWithoutAnimation(i), 50)
+    this.loopJumpTimer = setTimeout(
+      () =>
+        scrollView.setPageWithoutAnimation &&
+        scrollView.setPageWithoutAnimation(i),
+      50
+    )
   }
 
   /**
    * Automatic rolling
    */
   autoplay = () => {
-    if (!Array.isArray(this.props.children) ||
+    if (
+      !Array.isArray(this.props.children) ||
       !this.props.autoplay ||
       this.internals.isScrolling ||
-      this.state.autoplayEnd) return
+      this.state.autoplayEnd
+    )
+      return
 
     this.autoplayTimer && clearTimeout(this.autoplayTimer)
     this.autoplayTimer = setTimeout(() => {
-      if (!this.props.loop && (
-          this.props.autoplayDirection
-            ? this.state.index === this.state.total - 1
-            : this.state.index === 0
-        )
-      ) return this.setState({ autoplayEnd: true })
+      if (
+        !this.props.loop &&
+        (this.props.autoplayDirection
+          ? this.state.index === this.state.total - 1
+          : this.state.index === 0)
+      )
+        return this.setState({ autoplayEnd: true })
 
       this.scrollBy(this.props.autoplayDirection ? 1 : -1)
     }, this.props.autoplayTimeout * 1000)
@@ -271,7 +285,8 @@ export default class extends Component {
   onScrollBegin = e => {
     // update scroll state
     this.internals.isScrolling = true
-    this.props.onScrollBeginDrag && this.props.onScrollBeginDrag(e, this.fullState(), this)
+    this.props.onScrollBeginDrag &&
+      this.props.onScrollBeginDrag(e, this.fullState(), this)
   }
 
   /**
@@ -284,10 +299,14 @@ export default class extends Component {
 
     // making our events coming from android compatible to updateIndex logic
     if (!e.nativeEvent.contentOffset) {
-      if (this.state.dir === 'x') {
-        e.nativeEvent.contentOffset = {x: e.nativeEvent.position * this.state.width}
+      if (this.state.dir === "x") {
+        e.nativeEvent.contentOffset = {
+          x: e.nativeEvent.position * this.state.width
+        }
       } else {
-        e.nativeEvent.contentOffset = {y: e.nativeEvent.position * this.state.height}
+        e.nativeEvent.contentOffset = {
+          y: e.nativeEvent.position * this.state.height
+        }
       }
     }
 
@@ -296,7 +315,8 @@ export default class extends Component {
       this.loopJump()
 
       // if `onMomentumScrollEnd` registered will be called here
-      this.props.onMomentumScrollEnd && this.props.onMomentumScrollEnd(e, this.fullState(), this)
+      this.props.onMomentumScrollEnd &&
+        this.props.onMomentumScrollEnd(e, this.fullState(), this)
     })
   }
 
@@ -312,8 +332,10 @@ export default class extends Component {
     const previousOffset = horizontal ? offset.x : offset.y
     const newOffset = horizontal ? contentOffset.x : contentOffset.y
 
-    if (previousOffset === newOffset &&
-      (index === 0 || index === children.length - 1)) {
+    if (
+      previousOffset === newOffset &&
+      (index === 0 || index === children.length - 1)
+    ) {
       this.internals.isScrolling = false
     }
   }
@@ -327,7 +349,7 @@ export default class extends Component {
     const state = this.state
     let index = state.index
     const diff = offset[dir] - this.internals.offset[dir]
-    const step = dir === 'x' ? state.width : state.height
+    const step = dir === "x" ? state.width : state.height
     let loopJump = false
 
     // Do nothing if offset no change.
@@ -390,11 +412,14 @@ export default class extends Component {
     const diff = (this.props.loop ? 1 : 0) + index + this.state.index
     let x = 0
     let y = 0
-    if (state.dir === 'x') x = diff * state.width
-    if (state.dir === 'y') y = diff * state.height
+    if (state.dir === "x") x = diff * state.width
+    if (state.dir === "y") y = diff * state.height
 
-    if (Platform.OS === 'android') {
-      this.refs.scrollView && this.refs.scrollView[animated ? 'setPage' : 'setPageWithoutAnimation'](diff)
+    if (Platform.OS === "android") {
+      this.refs.scrollView &&
+        this.refs.scrollView[animated ? "setPage" : "setPageWithoutAnimation"](
+          diff
+        )
     } else {
       this.refs.scrollView && this.refs.scrollView.scrollTo({ x, y, animated })
     }
@@ -406,7 +431,7 @@ export default class extends Component {
     })
 
     // trigger onScrollEnd manually in android
-    if (!animated || Platform.OS === 'android') {
+    if (!animated || Platform.OS === "android") {
       setImmediate(() => {
         this.onScrollEnd({
           nativeEvent: {
@@ -433,13 +458,14 @@ export default class extends Component {
 
     for (let prop in props) {
       // if(~scrollResponders.indexOf(prop)
-      if (typeof props[prop] === 'function' &&
-        prop !== 'onMomentumScrollEnd' &&
-        prop !== 'renderPagination' &&
-        prop !== 'onScrollBeginDrag'
+      if (
+        typeof props[prop] === "function" &&
+        prop !== "onMomentumScrollEnd" &&
+        prop !== "renderPagination" &&
+        prop !== "onScrollBeginDrag"
       ) {
         let originResponder = props[prop]
-        overrides[prop] = (e) => originResponder(e, this.fullState(), this)
+        overrides[prop] = e => originResponder(e, this.fullState(), this)
       }
     }
 
@@ -451,39 +477,60 @@ export default class extends Component {
    * @return {object} react-dom
    */
   renderPagination = () => {
-     // By default, dots only show when `total` >= 2
+    // By default, dots only show when `total` >= 2
     if (this.state.total <= 1) return null
 
     let dots = []
-    const ActiveDot = this.props.activeDot || <View style={[{
-      backgroundColor: this.props.activeDotColor || '#007aff',
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginLeft: 3,
-      marginRight: 3,
-      marginTop: 3,
-      marginBottom: 3
-    }, this.props.activeDotStyle]} />
-    const Dot = this.props.dot || <View style={[{
-      backgroundColor: this.props.dotColor || 'rgba(0,0,0,.2)',
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginLeft: 3,
-      marginRight: 3,
-      marginTop: 3,
-      marginBottom: 3
-    }, this.props.dotStyle ]} />
+    const ActiveDot =
+      this.props.activeDot ||
+      <View
+        style={[
+          {
+            backgroundColor: this.props.activeDotColor || "#007aff",
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            marginLeft: 3,
+            marginRight: 3,
+            marginTop: 3,
+            marginBottom: 3
+          },
+          this.props.activeDotStyle
+        ]}
+      />
+    const Dot =
+      this.props.dot ||
+      <View
+        style={[
+          {
+            backgroundColor: this.props.dotColor || "rgba(0,0,0,.2)",
+            width: 8,
+            height: 8,
+            borderRadius: 4,
+            marginLeft: 3,
+            marginRight: 3,
+            marginTop: 3,
+            marginBottom: 3
+          },
+          this.props.dotStyle
+        ]}
+      />
     for (let i = 0; i < this.state.total; i++) {
-      dots.push(i === this.state.index
-        ? React.cloneElement(ActiveDot, {key: i})
-        : React.cloneElement(Dot, {key: i})
+      dots.push(
+        i === this.state.index
+          ? React.cloneElement(ActiveDot, { key: i })
+          : React.cloneElement(Dot, { key: i })
       )
     }
 
     return (
-      <View pointerEvents='none' style={[styles['pagination_' + this.state.dir], this.props.paginationStyle]}>
+      <View
+        pointerEvents="none"
+        style={[
+          styles["pagination_" + this.state.dir],
+          this.props.paginationStyle
+        ]}
+      >
         {dots}
       </View>
     )
@@ -493,17 +540,16 @@ export default class extends Component {
     const child = this.props.children[this.state.index]
     const title = child && child.props && child.props.title
     return title
-      ? (<View style={styles.title}>
-        {this.props.children[this.state.index].props.title}
-      </View>)
+      ? <View style={styles.title}>
+          {this.props.children[this.state.index].props.title}
+        </View>
       : null
   }
 
   renderNextButton = () => {
     let button = null
 
-    if (this.props.loop ||
-      this.state.index !== this.state.total - 1) {
+    if (this.props.loop || this.state.index !== this.state.total - 1) {
       button = this.props.nextButton || <Text style={styles.buttonText}>›</Text>
     }
 
@@ -534,10 +580,17 @@ export default class extends Component {
 
   renderButtons = () => {
     return (
-      <View pointerEvents='box-none' style={[styles.buttonWrapper, {
-        width: this.state.width,
-        height: this.state.height
-      }, this.props.buttonWrapperStyle]}>
+      <View
+        pointerEvents="box-none"
+        style={[
+          styles.buttonWrapper,
+          {
+            width: this.state.width,
+            height: this.state.height
+          },
+          this.props.buttonWrapperStyle
+        ]}
+      >
         {this.renderPrevButton()}
         {this.renderNextButton()}
       </View>
@@ -545,26 +598,30 @@ export default class extends Component {
   }
 
   renderScrollView = pages => {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       return (
-        <ScrollView ref='scrollView'
+        <ScrollView
+          ref="scrollView"
           {...this.props}
           {...this.scrollViewPropOverrides()}
           contentContainerStyle={[styles.wrapper, this.props.style]}
           contentOffset={this.state.offset}
           onScrollBeginDrag={this.onScrollBegin}
           onMomentumScrollEnd={this.onScrollEnd}
-          onScrollEndDrag={this.onScrollEndDrag}>
+          onScrollEndDrag={this.onScrollEndDrag}
+        >
           {pages}
         </ScrollView>
-       )
+      )
     }
     return (
-      <ViewPagerAndroid ref='scrollView'
+      <ViewPagerAndroid
+        ref="scrollView"
         {...this.props}
         initialPage={this.props.loop ? this.state.index + 1 : this.state.index}
         onPageSelected={this.onScrollEnd}
-        style={{flex: 1}}>
+        style={{ flex: 1 }}
+      >
         {pages}
       </ViewPagerAndroid>
     )
@@ -574,7 +631,7 @@ export default class extends Component {
    * Default render
    * @return {object} react-dom
    */
-  render () {
+  render() {
     const state = this.state
     const props = this.props
     const children = props.children
@@ -587,12 +644,15 @@ export default class extends Component {
 
     let pages = []
 
-    const pageStyle = [{width: state.width, height: state.height}, styles.slide]
+    const pageStyle = [
+      { width: state.width, height: state.height },
+      styles.slide
+    ]
     const pageStyleLoading = {
       width: this.state.width,
       height: this.state.height,
-      justifyContent: 'center',
-      alignItems: 'center'
+      justifyContent: "center",
+      alignItems: "center"
     }
 
     // For make infinite at least total > 1
@@ -600,19 +660,23 @@ export default class extends Component {
       // Re-design a loop model for avoid img flickering
       pages = Object.keys(children)
       if (loop) {
-        pages.unshift(total - 1 + '')
-        pages.push('0')
+        pages.unshift(total - 1 + "")
+        pages.push("0")
       }
 
       pages = pages.map((page, i) => {
         if (props.loadMinimal) {
-          if (i >= (index + loopVal - props.loadMinimalSize) &&
-            i <= (index + loopVal + props.loadMinimalSize)) {
+          if (
+            i >= index + loopVal - props.loadMinimalSize &&
+            i <= index + loopVal + props.loadMinimalSize
+          ) {
             return <View style={pageStyle} key={i}>{children[page]}</View>
           } else {
             return (
               <View style={pageStyleLoading} key={`loading-${i}`}>
-                {props.loadMinimalLoader ? props.loadMinimalLoader : <ActivityIndicator />}
+                {props.loadMinimalLoader
+                  ? props.loadMinimalLoader
+                  : <ActivityIndicator />}
               </View>
             )
           }
@@ -625,14 +689,20 @@ export default class extends Component {
     }
 
     return (
-      <View style={[styles.container, {
-        width: state.width,
-        height: state.height
-      }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            width: state.width,
+            height: state.height
+          }
+        ]}
+      >
         {this.renderScrollView(pages)}
-        {props.showsPagination && (props.renderPagination
-          ? this.props.renderPagination(state.index, state.total, this)
-          : this.renderPagination())}
+        {props.showsPagination &&
+          (props.renderPagination
+            ? this.props.renderPagination(state.index, state.total, this)
+            : this.renderPagination())}
         {this.renderTitle()}
         {this.props.showsButtons && this.renderButtons()}
       </View>
